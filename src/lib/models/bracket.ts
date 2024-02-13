@@ -9,15 +9,15 @@ export interface Bracket {
     numberOfCompletedMatches: number;
     name: string;
     currentMatchId: string | null;
-    winner: Competitor | null;
+    winner: string | null;
 };
 
 export interface Match {
     id: string;
     slug: string;
-    competitor1: Competitor | null;
-    competitor2: Competitor | null;
-    winner: Competitor | null;
+    competitor1: string | null;
+    competitor2: string | null;
+    winner: string | null;
     isBye: boolean;
     round: number;
     match: number;

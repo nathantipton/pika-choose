@@ -35,6 +35,7 @@
 		docRef = doc(firestore, path);
 		const unsubscribe = onSnapshot(docRef, (doc) => {
 			bracket = { ...doc.data(), id: doc.id } as Bracket;
+			console.log(bracket);
 		});
 
 		return () => unsubscribe();
@@ -52,14 +53,14 @@
 		currentMatch = bracket.matches[bracket.currentMatchId];
 	}
 
-	const handleMatchWinner = async (match: Match | null, winner: Competitor | null | undefined) => {
+	const handleMatchWinner = async (match: Match | null, winner: string | undefined | null) => {
 		if (!path || !docRef || !bracket || !winner) return;
 
 		if (!match) return;
 		if (!winner) return;
 
 		const updatedMatches = { ...bracket.matches };
-
+		console.log(match);
 		// Update the match with the winner
 		const updatedMatch = { ...match, winner, status: MatchStatus.Complete };
 		updatedMatches[match.id] = updatedMatch;
@@ -104,7 +105,7 @@
 			matches: updatedMatches,
 			currentMatchId: bracket.currentMatchId,
 			status: bracket.status,
-			numberOfCompletedMatches: increment(1)
+			numberOfCompletedMatches: bracket.numberOfCompletedMatches + 1
 		});
 	};
 </script>
@@ -124,38 +125,40 @@
 				<Button on:click={handleBegin}>Let's Begin!</Button>
 			{:else if bracket.status === BracketStatus.InProgress}
 				{#if currentMatch}
-					<div>
+					<div class="flex flex-row items-center justify-between">
 						<h4>Round {currentMatch.round}</h4>
 						<p>{bracket.numberOfCompletedMatches}/{bracket.numberOfMatches}</p>
 					</div>
 
 					<div class="flex flex-row items-start gap-4">
-						<div class="flex flex-row items-center gap-4">
-							<Button
-								class="transition-all focus:scale-95"
-								variant="secondary"
-								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
-							>
-								<PokemonCard pokemon={currentMatch.competitor1}></PokemonCard>
-							</Button>
+						{#key currentMatch.id}
+							<div class="flex flex-row items-center gap-4">
+								<Button
+									class="transition-all focus:scale-95"
+									variant="secondary"
+									on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
+								>
+									<PokemonCard slug={currentMatch.competitor1}></PokemonCard>
+								</Button>
 
-							<h3>VS</h3>
-							<Button
-								class="transition-all focus:scale-95"
-								variant="secondary"
-								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor2)}
-							>
-								<PokemonCard pokemon={currentMatch.competitor2}></PokemonCard>
-							</Button>
-						</div>
-						<!-- <TournamentView {bracket}></TournamentView> -->
+								<h3>VS</h3>
+								<Button
+									class="transition-all focus:scale-95"
+									variant="secondary"
+									on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor2)}
+								>
+									<PokemonCard slug={currentMatch.competitor2}></PokemonCard>
+								</Button>
+							</div>
+						{/key}
+						<TournamentView {bracket}></TournamentView>
 					</div>
 				{/if}
 			{:else if bracket.status === BracketStatus.Complete}
 				<div class="flex flex-col items-center gap-4">
-					<h3 class="uppercase">{bracket.winner?.name} wins!</h3>
+					<h3 class="uppercase">{bracket.winner} wins!</h3>
 
-					<PokemonCard pokemon={bracket.winner}></PokemonCard>
+					<PokemonCard slug={bracket.winner}></PokemonCard>
 				</div>
 			{/if}
 		</div>

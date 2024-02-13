@@ -29,14 +29,14 @@
 					<div class="rounded-lg border border-gray-200 p-4 shadow-md">
 						<p>{match.id}</p>
 						<div>
-							{match.competitor1 ? match.competitor1.name : 'TBD'} vs {match.competitor2
-								? match.competitor2.name
+							{match.competitor1 ? match.competitor1 : 'TBD'} vs {match.competitor2
+								? match.competitor2
 								: match.isBye
 									? 'Bye'
 									: 'TBD'}
 						</div>
 						{#if match.winner}
-							<div class="text-green-500">Winner: {match.winner.name}</div>
+							<div class="text-green-500">Winner: {match.winner}</div>
 						{/if}
 					</div>
 				{/each}

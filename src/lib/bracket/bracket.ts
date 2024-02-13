@@ -68,7 +68,7 @@ export const createBracket = async (competitors: Competitor[], name: string): Pr
 
     // If the number of teams is not a power of 2, add byes to the teams array in the form of nulls.
     const teamsForBracket = reorderTeamsForMatchups(
-        competitors.concat(Array(maxTeams - totalTeams).fill(null)),
+        competitors.map(c=>c.name).concat(Array(maxTeams - totalTeams).fill(null)),
         rounds
     );
 
@@ -142,10 +142,10 @@ function matchesArrayToObject(matches: Match[]): { [key: string]: Match } {
 }
 
 function reorderTeamsForMatchups(
-    teams: (Competitor | null)[],
+    teams: (string | null)[],
     levels: number,
     counter: number = 1
-): (Competitor | null)[] {
+): (string | null)[] {
     // Base case: If the list cannot be meaningfully split further or counter exceeds levels.
     if (teams.length <= 1 || counter > levels) {
         return teams;
@@ -171,8 +171,8 @@ function reorderTeamsForMatchups(
     return combinedTeams;
 }
 
-function split(teams: (Competitor | null)[]): (Competitor | null)[][] {
-    let result: (Competitor | null)[][] = [[], []];
+function split(teams: (string | null)[]): (string | null)[][] {
+    let result: (string | null)[][] = [[], []];
     let counter = 1;
     let arrayIndex = 0;
 
@@ -188,8 +188,8 @@ function split(teams: (Competitor | null)[]): (Competitor | null)[][] {
     return result;
 }
 
-function interleave(left: (Competitor | null)[], right: (Competitor | null)[]): (Competitor | null)[] {
-    const result: (Competitor | null)[] = [];
+function interleave(left: (string | null)[], right: (string | null)[]): (string | null)[] {
+    const result: (string | null)[] = [];
     const maxLength = Math.max(left.length, right.length);
 
     for (let i = 0; i < maxLength; i++) {
