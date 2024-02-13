@@ -151,7 +151,7 @@
 								</Button>
 							</div>
 						{/key}
-						<TournamentView {bracket}></TournamentView>
+						<!-- <TournamentView {bracket}></TournamentView> -->
 					</div>
 				{/if}
 			{:else if bracket.status === BracketStatus.Complete}
