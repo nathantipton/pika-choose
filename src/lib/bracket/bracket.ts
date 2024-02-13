@@ -1,4 +1,4 @@
-import { type Bracket, type Match } from "$lib/models/bracket";
+import { MatchStatus, type Bracket, type Competitor, type Match } from "$lib/models/bracket";
 import type { BracketDataProvider } from "./providers";
 
 export class BracketService {
@@ -58,17 +58,17 @@ export class BracketService {
 // }
 
 
-export const createBracket = async (teams: string[], name: string): Promise<Bracket> => {
+export const createBracket = async (competitors: Competitor[], name: string): Promise<Bracket> => {
     const matches: Match[] = [];
 
-    const totalTeams = teams.length;
+    const totalTeams = competitors.length;
     const rounds = Math.ceil(Math.log2(totalTeams));
     const totalMatches = Math.pow(2, rounds) - 1;
     const maxTeams = Math.pow(2, rounds);
 
     // If the number of teams is not a power of 2, add byes to the teams array in the form of nulls.
     const teamsForBracket = reorderTeamsForMatchups(
-        teams.concat(Array(maxTeams - totalTeams).fill(null)),
+        competitors.concat(Array(maxTeams - totalTeams).fill(null)),
         rounds
     );
 
@@ -120,21 +120,32 @@ export const createBracket = async (teams: string[], name: string): Promise<Brac
     const bracket: Bracket = {
         id: null,
         name: name,
-        competitors: teams,
+        competitors: competitors,
         status: 0,
-        matches,
+        matches: matchesArrayToObject(matches),
         numberOfRounds: rounds,
-        numberOfMatches: totalMatches
+        numberOfMatches: competitors.length - 1,
+        numberOfCompletedMatches: 0,
+        currentMatchId: getCurrentMatchId(matches),
+        winner: null
     };
 
     return bracket;
 };
 
+function matchesArrayToObject(matches: Match[]): { [key: string]: Match } {
+    const matchesObject: { [key: string]: Match } = {};
+    for (let match of matches) {
+        matchesObject[match.id] = match;
+    }
+    return matchesObject;
+}
+
 function reorderTeamsForMatchups(
-    teams: (string | null)[],
+    teams: (Competitor | null)[],
     levels: number,
     counter: number = 1
-): (string | null)[] {
+): (Competitor | null)[] {
     // Base case: If the list cannot be meaningfully split further or counter exceeds levels.
     if (teams.length <= 1 || counter > levels) {
         return teams;
@@ -160,8 +171,8 @@ function reorderTeamsForMatchups(
     return combinedTeams;
 }
 
-function split(teams: (string | null)[]): (string | null)[][] {
-    let result: (string | null)[][] = [[], []];
+function split(teams: (Competitor | null)[]): (Competitor | null)[][] {
+    let result: (Competitor | null)[][] = [[], []];
     let counter = 1;
     let arrayIndex = 0;
 
@@ -177,8 +188,8 @@ function split(teams: (string | null)[]): (string | null)[][] {
     return result;
 }
 
-function interleave(left: (string | null)[], right: (string | null)[]): (string | null)[] {
-    const result: (string | null)[] = [];
+function interleave(left: (Competitor | null)[], right: (Competitor | null)[]): (Competitor | null)[] {
+    const result: (Competitor | null)[] = [];
     const maxLength = Math.max(left.length, right.length);
 
     for (let i = 0; i < maxLength; i++) {
@@ -210,6 +221,7 @@ function handleByes(matches: Match[]) {
     for (let match of matches) {
         if (match.isBye) {
             match.winner = match.competitor1 ? match.competitor1 : match.competitor2;
+            match.status = MatchStatus.Complete;
 
             const winnerGoesToMatch = matches.find(m => m.id === match.winnerGoesTo);
 
@@ -223,4 +235,8 @@ function handleByes(matches: Match[]) {
         }
     }
 
+}
+
+function getCurrentMatchId(matches: Match[]): string | null {
+    return matches.find(m => m.status === MatchStatus.NotStarted)?.id ?? null;
 }

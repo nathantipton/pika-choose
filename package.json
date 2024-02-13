@@ -15,7 +15,6 @@
 		"test:unit": "vitest"
 	},
 	"devDependencies": {
-		"@fontsource/luckiest-guy": "^5.0.18",
 		"@playwright/test": "^1.28.1",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",

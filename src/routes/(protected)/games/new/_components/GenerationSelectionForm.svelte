@@ -14,6 +14,19 @@
 	let bracketName: string = '';
 	let pokemonCount: number = 0;
 	let selectedSpecies: string[] = [];
+	const sample =  [
+		"bulbasaur",
+		"charmander",
+		"squirtle",
+		"caterpie",
+		"weedle",
+		"pidgey",
+		"rattata",
+		"spearow",
+		"ekans",
+		"sandshrew",
+		"nidoran-f"
+	]
 	$: if (selectedGenerations.length > 0) {
 		pokemonCount = 0;
 		selectedSpecies = [];
@@ -28,6 +41,15 @@
 			bracketName = `The Best Pokémon of ${selectedGenerations.map((g) => g.toUpperCase()).join(', ')}`;
 		}
 	}
+
+	const handleSmallSample = () => {
+		selectedSpecies = sample;
+		pokemonCount = sample.length;
+
+		bracketName = "Small Sample Bracket";
+
+		handleCreateBracket();
+	};
 
 	const handleCreateBracket = async () => {
 		const uid = $user?.uid ?? null;
@@ -76,4 +98,6 @@
 	<Button on:click={handleCreateBracket} disabled={selectedGenerations.length === 0}
 		>Create Bracket</Button
 	>
+
+	<Button on:click={handleSmallSample}>Small Sample</Button>
 </div>

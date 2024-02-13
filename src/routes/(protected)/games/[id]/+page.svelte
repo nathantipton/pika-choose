@@ -2,33 +2,162 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { firestore, user } from '$lib/client/firebase';
-	import { doc, onSnapshot } from 'firebase/firestore';
-	import type { Bracket } from '$lib/models/bracket';
+	import {
+		DocumentReference,
+		doc,
+		onSnapshot,
+		type DocumentData,
+		updateDoc,
+		increment
+	} from 'firebase/firestore';
+	import {
+		BracketStatus,
+		type Bracket,
+		type Match,
+		MatchStatus,
+		type Competitor
+	} from '$lib/models/bracket';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import PokemonThumbnail from '$lib/components/pokemon/PokemonThumbnail.svelte';
 	import PokemonCard from '$lib/components/pokemon/PokemonCard.svelte';
+	import TournamentView from '$lib/components/TournamentView.svelte';
 
 	let bracket: Bracket | null = null;
+	let path: string | null = null;
+	let docRef: DocumentReference<DocumentData, DocumentData> | null = null;
+	let currentMatch: Match | null = null;
 
 	onMount(() => {
 		const uid = $user?.uid || null;
 		if (!uid) return;
 
-		const path = `user-brackets/${uid}/brackets/${$page.params.id}`;
-		const docRef = doc(firestore, path);
+		path = `user-brackets/${uid}/brackets/${$page.params.id}`;
+		docRef = doc(firestore, path);
 		const unsubscribe = onSnapshot(docRef, (doc) => {
 			bracket = { ...doc.data(), id: doc.id } as Bracket;
 		});
 
 		return () => unsubscribe();
 	});
+
+	const handleBegin = async () => {
+		if (!path || !docRef) return;
+
+		await updateDoc(docRef, {
+			status: BracketStatus.InProgress
+		});
+	};
+
+	$: if (bracket && bracket.status === BracketStatus.InProgress && bracket.currentMatchId) {
+		currentMatch = bracket.matches[bracket.currentMatchId];
+	}
+
+	const handleMatchWinner = async (match: Match | null, winner: Competitor | null | undefined) => {
+		if (!path || !docRef || !bracket || !winner) return;
+
+		if (!match) return;
+		if (!winner) return;
+
+		const updatedMatches = { ...bracket.matches };
+
+		// Update the match with the winner
+		const updatedMatch = { ...match, winner, status: MatchStatus.Complete };
+		updatedMatches[match.id] = updatedMatch;
+
+		// if the match is the final match, update the bracket status to complete
+		if (match.isFinal) {
+			bracket.status = BracketStatus.Complete;
+
+			await updateDoc(docRef, {
+				matches: updatedMatches,
+				status: bracket.status,
+				winner
+			});
+
+			return;
+		}
+
+		// Move the winner to the winner goes to match
+		if (!match.winnerGoesTo) return;
+		const winnerGoesToMatch = updatedMatches[match.winnerGoesTo];
+		if (winnerGoesToMatch.competitor1 === null) {
+			winnerGoesToMatch.competitor1 = winner;
+		} else if (winnerGoesToMatch.competitor2 === null) {
+			winnerGoesToMatch.competitor2 = winner;
+		}
+
+		// Update the brackets current match id with the next match id if it exists and the match is not complete
+		let nextMatchId: string | null = null;
+		while (nextMatchId === null) {
+			if (!match?.nextMatchId) break;
+			const nextMatch: Match = updatedMatches[match.nextMatchId];
+			if (nextMatch && nextMatch.status !== MatchStatus.Complete) {
+				nextMatchId = nextMatch.id;
+			} else {
+				console.log(`Skipping match ${nextMatch.id}`);
+				match = nextMatch;
+			}
+		}
+		bracket.currentMatchId = nextMatchId;
+
+		await updateDoc(docRef, {
+			matches: updatedMatches,
+			currentMatchId: bracket.currentMatchId,
+			status: bracket.status,
+			numberOfCompletedMatches: increment(1)
+		});
+	};
 </script>
 
-<div class="container mx-auto flex flex-col items-stretch justify-start gap-8 py-8">
+<div class="container mx-auto flex flex-col items-center justify-start gap-8 py-8">
 	{#if bracket}
 		<h1 class="text-center">{bracket.name}</h1>
-		<div>
+		<div
+			class="absolute bottom-0 left-0 right-0 top-0 -z-10 flex max-h-screen-safe flex-row flex-wrap justify-center gap-4 overflow-hidden opacity-10"
+		>
 			{#each bracket.competitors as pokemon (pokemon)}
-				<PokemonCard slug={pokemon}></PokemonCard>
+				<PokemonThumbnail {pokemon}></PokemonThumbnail>
 			{/each}
+		</div>
+		<div>
+			{#if bracket.status === BracketStatus.NotStarted}
+				<Button on:click={handleBegin}>Let's Begin!</Button>
+			{:else if bracket.status === BracketStatus.InProgress}
+				{#if currentMatch}
+					<div>
+						<h4>Round {currentMatch.round}</h4>
+						<p>{bracket.numberOfCompletedMatches}/{bracket.numberOfMatches}</p>
+					</div>
+
+					<div class="flex flex-row items-start gap-4">
+						<div class="flex flex-row items-center gap-4">
+							<Button
+								class="transition-all focus:scale-95"
+								variant="secondary"
+								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
+							>
+								<PokemonCard pokemon={currentMatch.competitor1}></PokemonCard>
+							</Button>
+
+							<h3>VS</h3>
+							<Button
+								class="transition-all focus:scale-95"
+								variant="secondary"
+								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor2)}
+							>
+								<PokemonCard pokemon={currentMatch.competitor2}></PokemonCard>
+							</Button>
+						</div>
+						<!-- <TournamentView {bracket}></TournamentView> -->
+					</div>
+				{/if}
+			{:else if bracket.status === BracketStatus.Complete}
+				<div class="flex flex-col items-center gap-4">
+					<h3 class="uppercase">{bracket.winner?.name} wins!</h3>
+
+					<PokemonCard pokemon={bracket.winner}></PokemonCard>
+				</div>
+			{/if}
 		</div>
 	{:else}
 		<p>Loading...</p>

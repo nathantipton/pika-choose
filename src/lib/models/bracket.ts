@@ -1,20 +1,23 @@
 
 export interface Bracket {
     id: string | null;
-    competitors: string[];
-    matches: Match[];
+    competitors: Competitor[];
+    matches: { [key: string]: Match };
     status: BracketStatus;
     numberOfRounds: number;
     numberOfMatches: number;
+    numberOfCompletedMatches: number;
     name: string;
+    currentMatchId: string | null;
+    winner: Competitor | null;
 };
 
 export interface Match {
     id: string;
     slug: string;
-    competitor1: string | null;
-    competitor2: string | null;
-    winner: string | null;
+    competitor1: Competitor | null;
+    competitor2: Competitor | null;
+    winner: Competitor | null;
     isBye: boolean;
     round: number;
     match: number;
@@ -37,7 +40,7 @@ export enum MatchStatus {
 };
 
 export interface Competitor {
-    id: string | null;
+    id: number | null;
     name: string;
     photoUrl: string;
     seed?: number;
