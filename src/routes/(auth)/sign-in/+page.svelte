@@ -8,8 +8,6 @@
 	import MagicLinkForm from './_components/MagicLinkForm.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import AuthToggle from '$lib/components/ui/auth/AuthToggle.svelte';
-	import { authStatus } from '$lib/stores/auth.stores';
-	import { AuthStatus } from '$lib/models/auth';
 
 	export let data;
 
@@ -41,7 +39,7 @@
 	onMount(() => {
 		const unsubscribe = user.subscribe(async (user) => {
 			if (user) {
-				await goto('/');
+				await goto('/games');
 			}
 		});
 		return () => unsubscribe();
@@ -50,7 +48,7 @@
 
 <AuthToggle>
 	<main
-		class="mx-auto flex max-w-sm flex-col items-stretch justify-start gap-4 py-8"
+		class="container mx-auto flex max-w-sm flex-col items-stretch justify-start gap-4 py-8"
 		slot="unauthenticated"
 	>
 		<h1 class="text-center text-3xl">Sign In</h1>

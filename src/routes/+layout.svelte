@@ -9,6 +9,7 @@
 	import { auth, user, userData } from '$lib/client/firebase';
 	import { goto } from '$app/navigation';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { User } from 'lucide-svelte';
 
 	const handleSignOut = async () => {
 		await auth?.signOut();
@@ -34,12 +35,12 @@
 									src={$userData.photoURL}
 									alt={$userData.username}
 								/>
+							{:else}
+								<User></User>
 							{/if}
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content side="bottom" align="end">
 							<DropdownMenu.Group>
-								<DropdownMenu.Label>{$userData?.username}</DropdownMenu.Label>
-								<DropdownMenu.Separator />
 								<DropdownMenu.Item>
 									<Button variant="ghost" size="sm" on:click={handleSignOut}>Sign Out</Button>
 								</DropdownMenu.Item>

@@ -14,6 +14,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import PokemonThumbnail from '$lib/components/pokemon/PokemonThumbnail.svelte';
 	import PokemonCard from '$lib/components/pokemon/PokemonCard.svelte';
+	import { Loader2 } from 'lucide-svelte';
 
 	let bracket: Bracket | null = null;
 	let path: string | null = null;
@@ -153,6 +154,6 @@
 			{/if}
 		</div>
 	{:else}
-		<p>Loading...</p>
+		<Loader2 class="animate-spin" />
 	{/if}
 </div>

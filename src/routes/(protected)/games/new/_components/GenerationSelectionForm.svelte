@@ -29,7 +29,7 @@
 		}
 
 		if (bracketName === '') {
-			bracketName = `My Favorite Pokémon Bracket`;
+			bracketName = `My Favorite Pokémon`;
 		}
 	}
 

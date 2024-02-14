@@ -50,11 +50,11 @@
 		username = '';
 		isAvailable = false;
 
-		goto('/');
+		goto('/games');
 	}
 </script>
 
-<div class="container mx-auto max-w-lg p-4">
+<div class="container mx-auto flex max-w-lg flex-col p-4">
 	<AuthCheck>
 		{#if $userData?.username}
 			<div class="flex flex-col gap-4">
@@ -62,14 +62,17 @@
 					Your username is <span class="text-success font-bold">@{$userData.username}</span>
 				</h2>
 				<p class="text-sm">(Usernames cannot be changed)</p>
-				<Button class="btn" href="/events">Find your first game!</Button>
+				<Button class="btn" href="/games">Start a bracket</Button>
 			</div>
 		{:else}
-			<h1>What do we call you?</h1>
+			<h1 class="text-center text-xl">What do we call you?</h1>
 
-			<form class="mt-6" on:submit|preventDefault={confirmUsername}>
+			<form
+				class="mt-6 flex flex-col items-stretch justify-start"
+				on:submit|preventDefault={confirmUsername}
+			>
 				<div class="form-control">
-					<Label class="label" for="username">Username</Label>
+					<Label class="text-center" for="username">Username</Label>
 					<Input
 						id="username"
 						type="text"
@@ -96,7 +99,9 @@
 					{/if}
 
 					{#if isAvailable}
-						<Button variant="secondary" type="submit">Confirm username @{username}</Button>
+						<Button class="w-full" variant="secondary" type="submit"
+							>Confirm username @{username}</Button
+						>
 					{/if}
 				</div>
 			</form>
