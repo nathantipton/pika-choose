@@ -104,7 +104,7 @@
 	};
 </script>
 
-<div class="py-4 md:py-8 container mx-auto flex flex-col items-center justify-start gap-8">
+<div class="container mx-auto flex flex-col items-center justify-start gap-8 py-4 md:py-4">
 	{#if bracket}
 		<h1 class="text-center text-2xl md:text-4xl">{bracket.name}</h1>
 		<div
@@ -120,15 +120,17 @@
 			{:else if bracket.status === BracketStatus.InProgress}
 				{#if currentMatch}
 					<div class="mb-4 flex flex-row items-center justify-between">
-						<h4>Round {currentMatch.round}</h4>
-						<p>{bracket.numberOfCompletedMatches + 1}/{bracket.numberOfMatches}</p>
+						<h4>Round {currentMatch.round} of {bracket.numberOfRounds}</h4>
+						<p class="text-lg font-bold">
+							{((bracket.numberOfCompletedMatches / bracket.numberOfMatches) * 100).toFixed(0)}%
+						</p>
 					</div>
 
 					{#key currentMatch.id}
 						<div class="flex flex-col items-center gap-4 md:flex-row">
 							<Button
 								class="transition-all focus:scale-95"
-								variant="secondary"
+								variant="default"
 								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
 							>
 								<PokemonCard slug={currentMatch.competitor1}></PokemonCard>
