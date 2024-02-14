@@ -148,8 +148,9 @@
 			{:else if bracket.status === BracketStatus.Complete}
 				<div class="flex flex-col items-center gap-4">
 					<h3 class="uppercase">{bracket.winner} wins!</h3>
-
-					<PokemonCard slug={bracket.winner}></PokemonCard>
+					{#key bracket.winner}
+						<PokemonCard slug={bracket.winner}></PokemonCard>
+					{/key}
 				</div>
 			{/if}
 		</div>
