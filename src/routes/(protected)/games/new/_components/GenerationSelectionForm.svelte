@@ -13,7 +13,7 @@
 
 	export let generations: GenerationDTO[];
 	let selectedGenerations: string[] = ['generation-i'];
-	let bracketName: string = '';
+	let bracketName: string = `My Favorite Pokémon`;
 	let pokemonCount: number = 0;
 	let selectedSpecies: string[] = [];
 	let submitting = false;
@@ -26,10 +26,6 @@
 				selectedSpecies.push(...generation.pokemon_species);
 				pokemonCount += generation.pokemon_species.length;
 			}
-		}
-
-		if (bracketName === '') {
-			bracketName = `My Favorite Pokémon`;
 		}
 	}
 

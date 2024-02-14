@@ -14,6 +14,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
     for (const [index, competitor] of payload.competitors.entries()) {
         const pokemon = POKEMON_COMPETITORS[competitor as keyof typeof POKEMON_COMPETITORS];
+        if (!pokemon) {
+            continue;
+            // TODO fix the weird id issue
+        }
         competitors.push({
             id: pokemon.id,
             name: pokemon.name,
