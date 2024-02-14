@@ -23,7 +23,10 @@
 <div class="min-h-screen-safe">
 	<header class="p-4">
 		<nav class="mx-auto flex flex-row items-center justify-between md:container">
-			<a href="/" title="Home"><h1 class="text-2xl">PikaChoose</h1></a>
+			<a href="/" title="Home" class="flex flex-row items-center gap-2">
+				<img src="/logo.svg" alt="PikaChoose Logo" class="w-24" />
+				<h1 class="text-2xl">PikaChoose</h1>
+			</a>
 
 			<AuthToggle>
 				<div class="flex flex-row items-center justify-end gap-4" slot="authenticated">

@@ -104,7 +104,7 @@
 	};
 </script>
 
-<div class="container mx-auto flex flex-col items-center justify-start gap-8 py-8">
+<div class="py-4 md:py-8 container mx-auto flex flex-col items-center justify-start gap-8">
 	{#if bracket}
 		<h1 class="text-center text-2xl md:text-4xl">{bracket.name}</h1>
 		<div
