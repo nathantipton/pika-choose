@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { auth, magicLinkActionCodeSettings } from '$lib/client/firebase';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Form from '$lib/components/ui/form';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import Label from '$lib/components/ui/label/label.svelte';
-	import { magicLinkSchema, type MagicLinkSchema } from '$lib/schemas/magic-link';
-	import { sendSignInLinkToEmail, signInWithEmailLink } from 'firebase/auth';
+	import {  type MagicLinkSchema } from '$lib/schemas/magic-link';
+	import { sendSignInLinkToEmail } from 'firebase/auth';
 	import { toast } from 'svelte-sonner';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms/client';
@@ -21,7 +20,7 @@
 	const signInWithEmail = async (email: string) => {
 		const loader = toast.loading('Sending link...');
 		try {
-			await signInWithEmailLink(auth, email, window.location.href);
+			await sendSignInLinkToEmail(auth, email, magicLinkActionCodeSettings);
 			toast.success('Sign in link sent! Check your inbox.');
 		} catch (error) {
 			toast.error('Failed to sign in. Please try again later');
