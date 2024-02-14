@@ -8,25 +8,16 @@
 	import { goto } from '$app/navigation';
 	import { Label } from '$lib/components/ui/label';
 	import { Input } from '$lib/components/ui/input';
+	import { toast } from 'svelte-sonner';
+	import { Loader2 } from 'lucide-svelte';
 
 	export let generations: GenerationDTO[];
 	let selectedGenerations: string[] = ['generation-i'];
 	let bracketName: string = '';
 	let pokemonCount: number = 0;
 	let selectedSpecies: string[] = [];
-	const sample =  [
-		"bulbasaur",
-		"charmander",
-		"squirtle",
-		"caterpie",
-		"weedle",
-		"pidgey",
-		"rattata",
-		"spearow",
-		"ekans",
-		"sandshrew",
-		"nidoran-f"
-	]
+	let submitting = false;
+
 	$: if (selectedGenerations.length > 0) {
 		pokemonCount = 0;
 		selectedSpecies = [];
@@ -38,66 +29,71 @@
 		}
 
 		if (bracketName === '') {
-			bracketName = `The Best Pokémon of ${selectedGenerations.map((g) => g.toUpperCase()).join(', ')}`;
+			bracketName = `My Favorite Pokémon Bracket`;
 		}
 	}
-
-	const handleSmallSample = () => {
-		selectedSpecies = sample;
-		pokemonCount = sample.length;
-
-		bracketName = "Small Sample Bracket";
-
-		handleCreateBracket();
-	};
 
 	const handleCreateBracket = async () => {
 		const uid = $user?.uid ?? null;
 		if (!uid) return;
 
-		const payload: CreateBracketPayload = {
-			competitors: selectedSpecies,
-			name: bracketName,
-			uid
-		};
+		submitting = true;
 
-		const results = await fetch('/api/bracket', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(payload)
-		});
+		try {
+			const payload: CreateBracketPayload = {
+				competitors: selectedSpecies,
+				name: bracketName,
+				uid
+			};
 
-		const bracketRes: CreateBracketResponse = await results.json();
+			const results = await fetch('/api/bracket', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
 
-		await goto(`/games/${bracketRes.bracket.id}`);
+			const bracketRes: CreateBracketResponse = await results.json();
+
+			await goto(`/games/${bracketRes.bracket.id}`);
+		} catch (error) {
+			console.error(error);
+			toast.error('Failed to create bracket');
+		} finally {
+			submitting = false;
+		}
 	};
 </script>
 
-<div class="flex w-full flex-col items-stretch gap-4">
-	<Label for="name" class="text-center">Bracket Name</Label>
-	<Input id="name" type="text" autocomplete="off" class="text-center" bind:value={bracketName}
-	></Input>
-</div>
-<div>{pokemonCount.toLocaleString()} Pokémon selected</div>
-<ToggleGroup.Root
-	bind:value={selectedGenerations}
-	type="multiple"
-	class="grid w-full grid-cols-2 gap-4"
->
-	{#each generations as generation (generation.name)}
-		<ToggleGroup.Item value={generation.name} class="border">
-			{@const selected = selectedGenerations.includes(generation.name)}
-			<GenerationCard {generation} {selected}></GenerationCard>
-		</ToggleGroup.Item>
-	{/each}
-</ToggleGroup.Root>
+{#if submitting}
+	<div>
+		<Loader2 class="animate-spin"></Loader2>
+	</div>
+{:else}
+	<div class="flex w-full flex-col items-stretch gap-4">
+		<Label for="name" class="text-center">Bracket Name</Label>
+		<Input id="name" type="text" autocomplete="off" class="text-center" bind:value={bracketName}
+		></Input>
+	</div>
+	<p class="text-center text-sm text-muted-foreground md:text-base">
+		Choose which generations of Pokémon to include in your bracket.
+	</p>
+	<ToggleGroup.Root
+		bind:value={selectedGenerations}
+		type="multiple"
+		class="grid w-full grid-cols-1 md:grid-cols-2 gap-4"
+	>
+		{#each generations as generation (generation.name)}
+			<ToggleGroup.Item value={generation.name} class="border">
+				{@const selected = selectedGenerations.includes(generation.name)}
+				<GenerationCard {generation} {selected}></GenerationCard>
+			</ToggleGroup.Item>
+		{/each}
+	</ToggleGroup.Root>
+	<div class="text-sm text-muted-foreground">{pokemonCount.toLocaleString()} Pokémon selected</div>
 
-<div>
-	<Button on:click={handleCreateBracket} disabled={selectedGenerations.length === 0}
+	<Button class="w-full" on:click={handleCreateBracket} disabled={selectedGenerations.length === 0}
 		>Create Bracket</Button
 	>
-
-	<Button on:click={handleSmallSample}>Small Sample</Button>
-</div>
+{/if}

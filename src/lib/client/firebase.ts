@@ -5,7 +5,7 @@ import { invalidateAll } from "$app/navigation";
 import { AuthStatus } from "$lib/models/auth";
 import { initializeApp } from "firebase/app";
 import type { User } from "firebase/auth";
-import { getAuth, onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
+import { getAuth, onIdTokenChanged } from "firebase/auth";
 import { Timestamp, doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -113,6 +113,7 @@ export const userData: Readable<UserData | null> = derived(user, ($user, set) =>
         set(null);
     }
 });
+
 
 export interface BaseFirestoreDocument {
     id?: string;

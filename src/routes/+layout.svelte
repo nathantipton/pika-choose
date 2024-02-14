@@ -8,6 +8,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { auth, user, userData } from '$lib/client/firebase';
 	import { goto } from '$app/navigation';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 
 	const handleSignOut = async () => {
 		await auth?.signOut();
@@ -20,18 +21,31 @@
 <ModeWatcher />
 <div class="min-h-screen-safe">
 	<header class="p-4">
-		<nav class="container mx-auto flex flex-row items-center justify-between">
+		<nav class="mx-auto flex flex-row items-center justify-between md:container">
 			<a href="/" title="Home"><h1 class="text-2xl">PikaChoose</h1></a>
 
 			<AuthToggle>
 				<div class="flex flex-row items-center justify-end gap-4" slot="authenticated">
-					{#if $user && $userData}
-						{#if $userData.photoURL}
-							<img class="h-8 w-8 rounded-full" src={$userData.photoURL} alt={$userData.username} />
-						{/if}
-						<span>{$userData?.username ?? $user.email}</span>
-					{/if}
-					<Button on:click={handleSignOut}>Sign Out</Button>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							{#if $userData?.photoURL}
+								<img
+									class="h-8 w-8 rounded-full"
+									src={$userData.photoURL}
+									alt={$userData.username}
+								/>
+							{/if}
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content side="bottom" align="end">
+							<DropdownMenu.Group>
+								<DropdownMenu.Label>{$userData?.username}</DropdownMenu.Label>
+								<DropdownMenu.Separator />
+								<DropdownMenu.Item>
+									<Button variant="ghost" size="sm" on:click={handleSignOut}>Sign Out</Button>
+								</DropdownMenu.Item>
+							</DropdownMenu.Group>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
 				</div>
 
 				<Button slot="unauthenticated" href="/sign-in">Sign In</Button>

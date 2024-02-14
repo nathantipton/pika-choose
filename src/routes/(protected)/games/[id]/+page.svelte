@@ -10,17 +10,10 @@
 		updateDoc,
 		increment
 	} from 'firebase/firestore';
-	import {
-		BracketStatus,
-		type Bracket,
-		type Match,
-		MatchStatus,
-		type Competitor
-	} from '$lib/models/bracket';
+	import { BracketStatus, type Bracket, type Match, MatchStatus } from '$lib/models/bracket';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import PokemonThumbnail from '$lib/components/pokemon/PokemonThumbnail.svelte';
 	import PokemonCard from '$lib/components/pokemon/PokemonCard.svelte';
-	import TournamentView from '$lib/components/TournamentView.svelte';
 
 	let bracket: Bracket | null = null;
 	let path: string | null = null;
@@ -105,14 +98,14 @@
 			matches: updatedMatches,
 			currentMatchId: bracket.currentMatchId,
 			status: bracket.status,
-			numberOfCompletedMatches: bracket.numberOfCompletedMatches + 1
+			numberOfCompletedMatches: increment(1)
 		});
 	};
 </script>
 
 <div class="container mx-auto flex flex-col items-center justify-start gap-8 py-8">
 	{#if bracket}
-		<h1 class="text-center">{bracket.name}</h1>
+		<h1 class="text-center text-2xl md:text-4xl">{bracket.name}</h1>
 		<div
 			class="absolute bottom-0 left-0 right-0 top-0 -z-10 flex max-h-screen-safe flex-row flex-wrap justify-center gap-4 overflow-hidden opacity-10"
 		>
@@ -125,34 +118,31 @@
 				<Button on:click={handleBegin}>Let's Begin!</Button>
 			{:else if bracket.status === BracketStatus.InProgress}
 				{#if currentMatch}
-					<div class="flex flex-row items-center justify-between">
+					<div class="mb-4 flex flex-row items-center justify-between">
 						<h4>Round {currentMatch.round}</h4>
-						<p>{bracket.numberOfCompletedMatches}/{bracket.numberOfMatches}</p>
+						<p>{bracket.numberOfCompletedMatches + 1}/{bracket.numberOfMatches}</p>
 					</div>
 
-					<div class="flex flex-row items-start gap-4">
-						{#key currentMatch.id}
-							<div class="flex flex-row items-center gap-4">
-								<Button
-									class="transition-all focus:scale-95"
-									variant="secondary"
-									on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
-								>
-									<PokemonCard slug={currentMatch.competitor1}></PokemonCard>
-								</Button>
+					{#key currentMatch.id}
+						<div class="flex flex-col items-center gap-4 md:flex-row">
+							<Button
+								class="transition-all focus:scale-95"
+								variant="secondary"
+								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
+							>
+								<PokemonCard slug={currentMatch.competitor1}></PokemonCard>
+							</Button>
 
-								<h3>VS</h3>
-								<Button
-									class="transition-all focus:scale-95"
-									variant="secondary"
-									on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor2)}
-								>
-									<PokemonCard slug={currentMatch.competitor2}></PokemonCard>
-								</Button>
-							</div>
-						{/key}
-						<!-- <TournamentView {bracket}></TournamentView> -->
-					</div>
+							<h3>VS</h3>
+							<Button
+								class="transition-all focus:scale-95"
+								variant="secondary"
+								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor2)}
+							>
+								<PokemonCard slug={currentMatch.competitor2}></PokemonCard>
+							</Button>
+						</div>
+					{/key}
 				{/if}
 			{:else if bracket.status === BracketStatus.Complete}
 				<div class="flex flex-col items-center gap-4">

@@ -1,5 +1,5 @@
 <script>
-	import { user, userData } from '$lib/client/firebase';
+	import { user, userData} from '$lib/client/firebase';
 	import AuthCheck from '$lib/components/ui/auth/AuthCheck.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 </script>

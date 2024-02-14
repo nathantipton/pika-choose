@@ -12,8 +12,7 @@
 		<span>Loading...</span>
 	{:then generations}
 		<div class="flex flex-col items-center">
-			<h1 class="mb-4 text-4xl font-bold">New Bracket</h1>
-			<p class="text-center">Choose which generations of Pokémon to include in your bracket.</p>
+			<h1 class="mb-4 text-2xl font-bold md:text-4xl">New Bracket</h1>
 		</div>
 		<GenerationSelectionForm {generations}></GenerationSelectionForm>
 	{:catch error}

@@ -6,7 +6,7 @@
 	export let selected: boolean;
 </script>
 
-<div class="flex w-full flex-row items-center gap-2 p-4 text-sm uppercase">
+<div class="flex w-full flex-row items-center gap-2 whitespace-nowrap p-2 md:text-sm uppercase md:p-4">
 	{#if selected}
 		<Check size="14" />
 	{/if}
