@@ -24,7 +24,7 @@
 	{#key $pokemon.id}
 		<div class="flex w-48 flex-col items-center justify-center p-4">
 			<img src={$pokemon.photoUrl} alt={$pokemon.name} />
-			<h5>{$pokemon.name.toUpperCase()}</h5>
+			<h5 class="text-foreground">{$pokemon.name.toUpperCase()}</h5>
 		</div>
 	{/key}
 {/if}

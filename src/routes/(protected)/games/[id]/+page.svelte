@@ -129,8 +129,8 @@
 					{#key currentMatch.id}
 						<div class="flex flex-col items-center gap-4 md:flex-row">
 							<Button
-								class="transition-all focus:scale-95"
-								variant="default"
+								class="border bg-background transition-all focus:scale-95"
+								variant="ghost"
 								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
 							>
 								<PokemonCard slug={currentMatch.competitor1}></PokemonCard>
@@ -138,8 +138,8 @@
 
 							<h3>VS</h3>
 							<Button
-								class="transition-all focus:scale-95"
-								variant="secondary"
+								class="border bg-background transition-all focus:scale-95"
+								variant="ghost"
 								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor2)}
 							>
 								<PokemonCard slug={currentMatch.competitor2}></PokemonCard>
