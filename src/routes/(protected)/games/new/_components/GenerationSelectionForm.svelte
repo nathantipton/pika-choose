@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GenerationCard from './GenerationCard.svelte';
 	import * as ToggleGroup from '$lib/components/ui/toggle-group';
-	import type { GenerationDTO } from '$lib/models/generation';
+	import type { GenerationDTO, PokemonSpecies } from '$lib/models/generation';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { user } from '$lib/client/firebase';
 	import type { CreateBracketPayload, CreateBracketResponse } from '$lib/models/api';
@@ -15,7 +15,7 @@
 	let selectedGenerations: string[] = ['generation-i'];
 	let bracketName: string = `My Favorite Pokémon`;
 	let pokemonCount: number = 0;
-	let selectedSpecies: string[] = [];
+	let selectedSpecies: PokemonSpecies[] = [];
 	let submitting = false;
 
 	$: if (selectedGenerations.length > 0) {
@@ -36,7 +36,7 @@
 		submitting = true;
 
 		try {
-			const payload: CreateBracketPayload = {
+			const payload: CreateBracketPayload<PokemonSpecies> = {
 				competitors: selectedSpecies,
 				name: bracketName,
 				uid
@@ -78,7 +78,7 @@
 	<ToggleGroup.Root
 		bind:value={selectedGenerations}
 		type="multiple"
-		class="grid w-full grid-cols-1 md:grid-cols-2 gap-4"
+		class="grid w-full grid-cols-1 gap-4 md:grid-cols-2"
 	>
 		{#each generations as generation (generation.name)}
 			<ToggleGroup.Item value={generation.name} class="border">

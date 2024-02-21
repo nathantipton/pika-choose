@@ -1,4 +1,10 @@
 export interface GenerationDTO {
     name: string;
-    pokemon_species: string[];
+    id: number;
+    pokemon_species: PokemonSpecies[];
+}
+
+export interface PokemonSpecies {
+    name: string;
+    id: number;
 }

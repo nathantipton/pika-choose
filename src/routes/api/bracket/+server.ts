@@ -1,27 +1,22 @@
 import { createBracket } from "$lib/bracket/bracket";
 import type { CreateBracketPayload } from "$lib/models/api";
 import type { Competitor } from "$lib/models/bracket";
-import { POKEMON_COMPETITORS } from "$lib/models/pokemon-competitors";
+import type { PokemonSpecies } from "$lib/models/generation";
 import admin from "$lib/server/firebase-admin";
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 export const POST: RequestHandler = async ({ request }) => {
 
-    const payload: CreateBracketPayload = await request.json();
+    const payload: CreateBracketPayload<PokemonSpecies> = await request.json();
 
     const competitors: Competitor[] = [];
 
     for (const [index, competitor] of payload.competitors.entries()) {
-        const pokemon = POKEMON_COMPETITORS[competitor as keyof typeof POKEMON_COMPETITORS];
-        if (!pokemon) {
-            continue;
-            // TODO fix the weird id issue
-        }
         competitors.push({
-            id: pokemon.id,
-            name: pokemon.name,
-            photoUrl: pokemon.photoUrl,
+            id: competitor.id,
+            name: competitor.name,
+            photoUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${competitor.id}.png`,
             seed: index + 1
         });
     }

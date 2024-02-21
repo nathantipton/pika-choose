@@ -1,30 +1,41 @@
-import type { GenerationDTO } from '$lib/models/generation';
-import Pokedex from 'pokedex-promise-v2';
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = () => {
+export const load: PageServerLoad = async ({ fetch }) => {
 
     const fetchGenerations = async () => {
-        const P = new Pokedex();
-        const generations = await P.getGenerationsList();
 
-        const genResults: GenerationDTO[] = [];
+        const query = `
+        query generationsWithSpecies {
+            generations: pokemon_v2_generation(order_by: {id: asc}) {
+                name
+                id
+                pokemon_species: pokemon_v2_pokemonspecies(order_by: {order: asc}) {
+                    id
+                    name
+                    order
+                }
+            }
+        }`
 
-        for (const gen of generations.results) {
-            const genData = await P.getGenerationByName(gen.name);
-            genResults.push({
-                name: genData.name,
-                pokemon_species: genData.pokemon_species.map(p => p.name)
-            });
-        }
+        const response = await fetch('https://beta.pokeapi.co/graphql/v1beta', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                query
+            })
+        });
 
-        return genResults;
+        const { data } = await response.json();
+        return data.generations;
     }
 
 
     return {
-        async: {
-            generations$: fetchGenerations()
-        }
+
+        generations: await fetchGenerations()
+
     }
 }

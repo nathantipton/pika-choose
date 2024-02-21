@@ -1,7 +1,7 @@
 import type { Bracket } from "./bracket";
 
-export interface CreateBracketPayload {
-    competitors: string[];
+export interface CreateBracketPayload<T> {
+    competitors: T[];
     uid: string;
     name: string;
 }
