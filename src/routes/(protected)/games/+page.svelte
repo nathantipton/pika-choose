@@ -1,38 +1,23 @@
 <script lang="ts">
-	import { BracketStatus, type Bracket } from '$lib/models/bracket';
+	import { type Bracket } from '$lib/models/bracket';
 	import { onMount } from 'svelte';
 	import { firestore, user } from '$lib/client/firebase';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import {
-		CollectionReference,
-		collection,
-		type DocumentData,
-		onSnapshot,
-		query,
-		where
-	} from 'firebase/firestore';
+
+	import { FirestoreBracketDataProvider } from '$lib/bracket/providers/firestore';
 
 	let brackets: Bracket[] = [];
-	let path: string | null = null;
-	let colRef: CollectionReference<DocumentData, DocumentData> | null = null;
 
-	onMount(() => {
+	onMount(async () => {
 		const uid = $user?.uid || null;
 		if (!uid) return;
 
-		path = `user-brackets/${uid}/brackets`;
-		colRef = collection(firestore, path);
-		const q = query(colRef, where('status', '==', BracketStatus.InProgress));
-		const unsubscribe = onSnapshot(q, (snapshot) => {
-			brackets = snapshot.docs.map((doc) => {
-				return { ...doc.data(), id: doc.id } as Bracket;
-			});
-		});
-		return () => unsubscribe();
+		const firebaseBracket = new FirestoreBracketDataProvider(firestore);
+		brackets = await firebaseBracket.getUserBracketsInProgress(uid);
 	});
 </script>
 
-<div class="container mx-auto flex flex-col gap-4 py-8 max-w-md">
+<div class="container mx-auto flex max-w-md flex-col gap-4 py-8">
 	<h1 class="text-center text-2xl md:text-4xl">My Brackets</h1>
 	<div class="flex flex-col gap-4">
 		{#each brackets as bracket}

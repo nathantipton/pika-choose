@@ -1,62 +1,89 @@
-import { MatchStatus, type Bracket, type Competitor, type Match } from "$lib/models/bracket";
+import { BracketStatus, MatchStatus, type Bracket, type Competitor, type Match } from "$lib/models/bracket";
+import { writable } from "svelte/store";
 import type { BracketDataProvider } from "./providers";
 
 export class BracketService {
-    constructor(data: BracketDataProvider) { }
+    private _bracket: Bracket | null = null;
+    bracketStore = writable<Bracket | null>(null);
+    #data: BracketDataProvider;
+    #uid: string;
+    #bracketId: string;
+    #unsubscribe: () => void;
 
-    createBracket() {
+    constructor(data: BracketDataProvider, uid: string, bracketId: string) {
+        this.#data = data;
+        this.#uid = uid;
+        this.#bracketId = bracketId;
 
+        this.#unsubscribe = data.getBracketSubscription(bracketId, uid, (data, id) => {
+            this._bracket = { ...data, id } as Bracket;
+            this.bracketStore.set(this._bracket);
+            console.log("Bracket updated", this._bracket)
+        });
     }
+
+    get bracket() {
+        return this._bracket;
+    }
+
+    unsubscribe() {
+        this.#unsubscribe();
+    }
+
+    async beginBracket() {
+        await this.#data.saveBracket({ status: BracketStatus.InProgress }, this.#bracketId, this.#uid);
+    }
+
+    getCompetitorById(id: string): Competitor | null {
+        return this._bracket?.competitors.find(c => c.id?.toString() === id) ?? null;
+    }
+
+    async setMatchWinner(match: Match, winner: string) {
+        if (!this._bracket) {
+            return;
+        }
+
+        const updatedMatches = { ...this._bracket.matches };
+        const updatedMatch = { ...match, winner, status: MatchStatus.Complete };
+        updatedMatches[match.id] = updatedMatch;
+
+        if (match.isFinal) {
+            await this.#data.saveBracket({ matches: updatedMatches, winner, status: BracketStatus.Complete }, this.#bracketId, this.#uid);
+            return;
+        }
+
+        // Move the winner to the winner goes to match
+        if (!match.winnerGoesTo) return;
+        const winnerGoesToMatch = updatedMatches[match.winnerGoesTo];
+        if (winnerGoesToMatch.competitor1 === null) {
+            winnerGoesToMatch.competitor1 = winner;
+        } else if (winnerGoesToMatch.competitor2 === null) {
+            winnerGoesToMatch.competitor2 = winner;
+        }
+
+        // Update the brackets current match id with the next match id if it exists and the match is not complete
+        let nextMatchId: string | null = null;
+        while (nextMatchId === null) {
+            if (!match?.nextMatchId) break;
+            const nextMatch: Match = updatedMatches[match.nextMatchId];
+            if (nextMatch && nextMatch.status !== MatchStatus.Complete) {
+                nextMatchId = nextMatch.id;
+            } else {
+                ``;
+                match = nextMatch;
+            }
+        }
+        this._bracket.currentMatchId = nextMatchId;
+
+        await this.#data.saveBracket({ matches: updatedMatches, currentMatchId: nextMatchId, status: this._bracket.status }, this.#bracketId, this.#uid);
+        await this.#data.incrementCompletedMatches(this.#bracketId, this.#uid);
+    }
+
 }
 
 
-
-// export const createBracket = async (teams: string[]) => {
-//     const matches: Match[] = [];
-//     let totalMatches = teams.length - 1;
-
-//     // Calculate the number of initial byes if the teams are not a power of 2
-//     const rounds = Math.ceil(Math.log2(teams.length));
-//     const maxTeams = Math.pow(2, rounds);
-//     const byes = maxTeams - teams.length;
-
-
-//     // Assign byes to the initial round as necessary
-//     let round = 1;
-//     for (let i = 0; i < totalMatches; i += 2) {
-//         const match: Match = {
-//             id: `match-${round}-${i}`,
-//             competitor1: { id: teams[i], name: teams[i], photoUrl: "" },
-//             competitor2: { id: teams[i + 1], name: teams[i + 1], photoUrl: "" },
-//             winner: "",
-//             round: round,
-//             status: MatchStatus.NotStarted,
-//             nextMatchId: `match-${round + 1}-${i / 2}`
-//         };
-//         matches.push(match);
-//     }
-
-//     let remainingMatches = totalMatches - (teams.length - 1) / 2;
-//     while(remainingMatches > 0) {
-//         round++;
-//         for (let i = 0; i < remainingMatches; i += 2) {
-//             const match: Match = {
-//                 id: `match-${round}-${i}`,
-//                 competitor1: { id: "", name: "", photoUrl: "" },
-//                 competitor2: { id: "", name: "", photoUrl: "" },
-//                 winner: "",
-//                 round: round,
-//                 status: MatchStatus.NotStarted,
-//                 nextMatchId: `match-${round + 1}-${i / 2}`
-//             };
-//             matches.push(match);
-//         }
-//         remainingMatches = remainingMatches / 2;
-//     }
-
-//     return matches;
-// }
-
+// bracket creation logic
+// TODO: clean up this function
 
 export const createBracket = async (competitors: Competitor[], name: string): Promise<Bracket> => {
     const matches: Match[] = [];
