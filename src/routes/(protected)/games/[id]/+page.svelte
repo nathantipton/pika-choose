@@ -165,7 +165,7 @@
 			{:else if bracket.status === BracketStatus.Complete}
 				{@const winner = getCompetitor(bracket.winner || null)}
 				<div class="flex flex-col items-center gap-4">
-					<h3 class="uppercase">{bracket.winner} wins!</h3>
+					<h3 class="uppercase">{winner?.name} wins!</h3>
 					{#if winner}
 						{#key bracket.winner}
 							<PokemonCard pokemon={winner}></PokemonCard>
