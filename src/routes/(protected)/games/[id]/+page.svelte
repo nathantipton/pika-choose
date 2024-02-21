@@ -32,7 +32,6 @@
 		docRef = doc(firestore, path);
 		const unsubscribe = onSnapshot(docRef, (doc) => {
 			bracket = { ...doc.data(), id: doc.id } as Bracket;
-			console.log(bracket);
 		});
 
 		return () => unsubscribe();
@@ -48,7 +47,6 @@
 
 	const getCompetitor = (id: string | number | null) => {
 		if (!bracket || !id) return null;
-		console.log(id);
 		return bracket.competitors.find((c) => c.id?.toString() === id.toString()) || null;
 	};
 
@@ -67,7 +65,6 @@
 		if (!winner) return;
 
 		const updatedMatches = { ...bracket.matches };
-		console.log(match);
 		// Update the match with the winner
 		const updatedMatch = { ...match, winner, status: MatchStatus.Complete };
 		updatedMatches[match.id] = updatedMatch;
@@ -102,7 +99,7 @@
 			if (nextMatch && nextMatch.status !== MatchStatus.Complete) {
 				nextMatchId = nextMatch.id;
 			} else {
-				console.log(`Skipping match ${nextMatch.id}`);
+				``;
 				match = nextMatch;
 			}
 		}
@@ -117,7 +114,9 @@
 	};
 </script>
 
-<div class="container mx-auto flex flex-col items-center justify-start gap-8 py-4 md:py-4">
+<div
+	class="container mx-auto flex max-w-md flex-col items-center justify-start gap-8 py-4 md:max-w-xl md:py-4"
+>
 	{#if bracket}
 		<h1 class="text-center text-2xl md:text-4xl">{bracket.name}</h1>
 		<div
@@ -127,14 +126,14 @@
 				<PokemonThumbnail {pokemon}></PokemonThumbnail>
 			{/each}
 		</div>
-		<div use:autoAnimate>
+		<div use:autoAnimate class="flex flex-col items-stretch w-full">
 			{#if bracket.status === BracketStatus.NotStarted}
 				<Button on:click={handleBegin}>Let's Begin!</Button>
 			{:else if bracket.status === BracketStatus.InProgress}
 				{@const competitor1 = getCompetitor(currentMatch?.competitor1 || null)}
 				{@const competitor2 = getCompetitor(currentMatch?.competitor2 || null)}
 				{#if currentMatch && competitor1 && competitor2}
-					<div class="mb-4 flex flex-row items-center justify-between">
+					<div class="mb-4 flex w-full flex-row items-center justify-between">
 						<h4>Round {currentMatch.round} of {bracket.numberOfRounds}</h4>
 						<p class="text-lg font-bold">
 							{$percentComplete.toFixed(0)}%

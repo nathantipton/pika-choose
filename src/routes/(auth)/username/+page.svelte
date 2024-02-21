@@ -36,7 +36,6 @@
 	}
 
 	async function confirmUsername() {
-		console.log('confirming username', username);
 		const batch = writeBatch(firestore);
 		batch.set(doc(firestore, 'usernames', username), { uid: $user?.uid });
 		batch.set(doc(firestore, 'users', $user!.uid), {
