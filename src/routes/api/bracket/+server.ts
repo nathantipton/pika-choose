@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request }) => {
         competitors.push({
             id: competitor.id,
             name: competitor.name,
-            photoUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${competitor.id}.png`,
+            photoUrl: `https://res.cloudinary.com/dswsojmgx/image/upload/f_auto,q_auto/v1/pokemon/${competitor.id}`,
             seed: index + 1
         });
     }

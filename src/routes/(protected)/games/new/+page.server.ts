@@ -1,41 +1,16 @@
+import { GENERATIONS_WITH_SPECIES } from "$lib/graphql/queries";
+import { PokeAPI } from "$lib/pokeapi";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ fetch }) => {
 
     const fetchGenerations = async () => {
-
-        const query = `
-        query generationsWithSpecies {
-            generations: pokemon_v2_generation(order_by: {id: asc}) {
-                name
-                id
-                pokemon_species: pokemon_v2_pokemonspecies(order_by: {order: asc}) {
-                    id
-                    name
-                    order
-                }
-            }
-        }`
-
-        const response = await fetch('https://beta.pokeapi.co/graphql/v1beta', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                query
-            })
-        });
-
-        const { data } = await response.json();
-        return data.generations;
+        const pokeapi = new PokeAPI(fetch);
+        return await pokeapi.query(GENERATIONS_WITH_SPECIES).then(data => data.generations);
     }
 
 
     return {
-
         generations: await fetchGenerations()
-
     }
 }

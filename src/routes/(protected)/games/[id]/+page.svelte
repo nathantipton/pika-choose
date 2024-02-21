@@ -15,11 +15,14 @@
 	import PokemonThumbnail from '$lib/components/pokemon/PokemonThumbnail.svelte';
 	import PokemonCard from '$lib/components/pokemon/PokemonCard.svelte';
 	import { Loader2 } from 'lucide-svelte';
+	import autoAnimate from '@formkit/auto-animate';
+	import { tweened } from 'svelte/motion';
 
 	let bracket: Bracket | null = null;
 	let path: string | null = null;
 	let docRef: DocumentReference<DocumentData, DocumentData> | null = null;
 	let currentMatch: Match | null = null;
+	const percentComplete = tweened(0, { duration: 500 });
 
 	onMount(() => {
 		const uid = $user?.uid || null;
@@ -43,11 +46,21 @@
 		});
 	};
 
+	const getCompetitor = (id: string | number | null) => {
+		if (!bracket || !id) return null;
+		console.log(id);
+		return bracket.competitors.find((c) => c.id?.toString() === id.toString()) || null;
+	};
+
 	$: if (bracket && bracket.status === BracketStatus.InProgress && bracket.currentMatchId) {
 		currentMatch = bracket.matches[bracket.currentMatchId];
+		percentComplete.set((bracket.numberOfCompletedMatches / bracket.numberOfMatches) * 100);
 	}
 
-	const handleMatchWinner = async (match: Match | null, winner: string | undefined | null) => {
+	const handleMatchWinner = async (
+		match: Match | null,
+		winner: string | number | undefined | null
+	) => {
 		if (!path || !docRef || !bracket || !winner) return;
 
 		if (!match) return;
@@ -114,15 +127,17 @@
 				<PokemonThumbnail {pokemon}></PokemonThumbnail>
 			{/each}
 		</div>
-		<div>
+		<div use:autoAnimate>
 			{#if bracket.status === BracketStatus.NotStarted}
 				<Button on:click={handleBegin}>Let's Begin!</Button>
 			{:else if bracket.status === BracketStatus.InProgress}
-				{#if currentMatch}
+				{@const competitor1 = getCompetitor(currentMatch?.competitor1 || null)}
+				{@const competitor2 = getCompetitor(currentMatch?.competitor2 || null)}
+				{#if currentMatch && competitor1 && competitor2}
 					<div class="mb-4 flex flex-row items-center justify-between">
 						<h4>Round {currentMatch.round} of {bracket.numberOfRounds}</h4>
 						<p class="text-lg font-bold">
-							{((bracket.numberOfCompletedMatches / bracket.numberOfMatches) * 100).toFixed(0)}%
+							{$percentComplete.toFixed(0)}%
 						</p>
 					</div>
 
@@ -131,28 +146,31 @@
 							<Button
 								class="border bg-background transition-all focus:scale-95"
 								variant="ghost"
-								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor1)}
+								on:click={() => handleMatchWinner(currentMatch, competitor1.id)}
 							>
-								<PokemonCard slug={currentMatch.competitor1}></PokemonCard>
+								<PokemonCard pokemon={competitor1}></PokemonCard>
 							</Button>
 
 							<h3>VS</h3>
 							<Button
 								class="border bg-background transition-all focus:scale-95"
 								variant="ghost"
-								on:click={() => handleMatchWinner(currentMatch, currentMatch?.competitor2)}
+								on:click={() => handleMatchWinner(currentMatch, competitor2.id)}
 							>
-								<PokemonCard slug={currentMatch.competitor2}></PokemonCard>
+								<PokemonCard pokemon={competitor2}></PokemonCard>
 							</Button>
 						</div>
 					{/key}
 				{/if}
 			{:else if bracket.status === BracketStatus.Complete}
+				{@const winner = getCompetitor(bracket.winner || null)}
 				<div class="flex flex-col items-center gap-4">
 					<h3 class="uppercase">{bracket.winner} wins!</h3>
-					{#key bracket.winner}
-						<PokemonCard slug={bracket.winner}></PokemonCard>
-					{/key}
+					{#if winner}
+						{#key bracket.winner}
+							<PokemonCard pokemon={winner}></PokemonCard>
+						{/key}
+					{/if}
 				</div>
 			{/if}
 		</div>

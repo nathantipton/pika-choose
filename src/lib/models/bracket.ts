@@ -15,9 +15,9 @@ export interface Bracket {
 export interface Match {
     id: string;
     slug: string;
-    competitor1: string | null;
-    competitor2: string | null;
-    winner: string | null;
+    competitor1: string | number | null;
+    competitor2: string | number | null;
+    winner: string | number | null;
     isBye: boolean;
     round: number;
     match: number;

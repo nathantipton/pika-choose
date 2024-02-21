@@ -46,8 +46,11 @@
 	"dependencies": {
 		"@fontsource-variable/nunito": "^5.0.17",
 		"@fontsource/bungee": "^5.0.18",
+		"@formkit/auto-animate": "^0.8.1",
+		"@unpic/svelte": "^0.0.51",
 		"@vercel/kv": "^1.0.1",
 		"bits-ui": "^0.17.0",
+		"cloudinary": "^2.0.1",
 		"clsx": "^2.1.0",
 		"formsnap": "^0.4.3",
 		"mode-watcher": "^0.2.1",

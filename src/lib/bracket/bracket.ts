@@ -68,7 +68,7 @@ export const createBracket = async (competitors: Competitor[], name: string): Pr
 
     // If the number of teams is not a power of 2, add byes to the teams array in the form of nulls.
     const teamsForBracket = reorderTeamsForMatchups(
-        competitors.map(c=>c.name).concat(Array(maxTeams - totalTeams).fill(null)),
+        competitors.map(c => c.id?.toString() || null).concat(Array(maxTeams - totalTeams).fill(null)),
         rounds
     );
 

@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({ params }) => {
         const competitor: Competitor = {
             id: Number(id),
             name: pokemon.name,
-            photoUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
+            photoUrl: `https://res.cloudinary.com/dswsojmgx/image/upload/f_auto,q_auto/v1/pokemon/${id}`
         };
         competitors[pokemon.name] = competitor;
     }
