@@ -32,7 +32,7 @@
 	});
 </script>
 
-<div class="container mx-auto flex flex-col gap-4 py-8">
+<div class="container mx-auto flex flex-col gap-4 py-8 max-w-md">
 	<h1 class="text-center text-2xl md:text-4xl">My Brackets</h1>
 	<div class="flex flex-col gap-4">
 		{#each brackets as bracket}
