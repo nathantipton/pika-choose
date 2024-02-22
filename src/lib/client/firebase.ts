@@ -3,6 +3,7 @@ import { derived, writable, type Readable } from "svelte/store";
 
 import { invalidateAll } from "$app/navigation";
 import { AuthStatus } from "$lib/models/auth";
+import { getAnalytics, initializeAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import type { User } from "firebase/auth";
 import { getAuth, onIdTokenChanged } from "firebase/auth";
@@ -18,6 +19,7 @@ export const auth = getAuth();
 export const storage = getStorage();
 export const authStatus = writable<AuthStatus>(AuthStatus.NotInitialized);
 export const authUpdated = derived(authStatus, ($authStatus) => $authStatus !== AuthStatus.NotInitialized);
+export const analytics = getAnalytics(app);
 
 export const magicLinkActionCodeSettings = {
     url: `${PUBLIC_DOMAIN}/sign-in/magic-link`,
